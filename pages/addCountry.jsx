@@ -11,7 +11,7 @@ const AddCountry = () => {
   const [alert, setAlert] = useState(null); // State for managing alerts
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const apiUrl = 'http://3.109.155.155:8081';
+  const apiUrl = 'http://15.206.148.100:8081';
   const token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzdXBlcmFkbWluQGdtYWlsLmNvbSIsImlhdCI6MTcwMDQ3NzE2MywiZXhwIjozODQ3OTYwODEwfQ.r0m_f1jui6oyZprcBvTaBgR3Bt8mupeK_bQG5_UAsOAF6kcH1mJ9_YcrFJN__eol9qDi4WUbqvklG7M6KxtX6g';
 
   const handleSubmit = async (e) => {
