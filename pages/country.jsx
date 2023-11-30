@@ -36,7 +36,7 @@ const Country = () => {
   // const token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzdXBlcmFkbWluQGdtYWlsLmNvbSIsImlhdCI6MTY5ODIzMzA0MywiZXhwIjozODQ1NzE2NjkwfQ.9NGroKV45c2A56PpaA_xkbPI5QTd_E1XdoF1Ru1wU1jIGT2UBYG4sH4mXMUDjBAooqsUVBSzE0xKpr89KcFwmQ'; // Replace with your actual token
   // const apiUrl = 'https://mines-manager.up.railway.app';
 
-  const apiUrl = 'http://13.233.251.86:8081';
+  const apiUrl = 'http://3.109.155.155:8081';
   const token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzdXBlcmFkbWluQGdtYWlsLmNvbSIsImlhdCI6MTcwMDQ3NzE2MywiZXhwIjozODQ3OTYwODEwfQ.r0m_f1jui6oyZprcBvTaBgR3Bt8mupeK_bQG5_UAsOAF6kcH1mJ9_YcrFJN__eol9qDi4WUbqvklG7M6KxtX6g';
 
 
@@ -194,7 +194,7 @@ const Country = () => {
 
   // new code for edit with put
   const updateCountryOnServer = (countryId, updatedCountryName) => {
-    const apiUrl = 'http://13.233.251.86:8081';
+    const apiUrl = 'http://3.109.155.155:8081';
     const token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzdXBlcmFkbWluQGdtYWlsLmNvbSIsImlhdCI6MTcwMDQ3NzE2MywiZXhwIjozODQ3OTYwODEwfQ.r0m_f1jui6oyZprcBvTaBgR3Bt8mupeK_bQG5_UAsOAF6kcH1mJ9_YcrFJN__eol9qDi4WUbqvklG7M6KxtX6g';
 
     const updateUrl = `${apiUrl}/country/${countryId}`;
@@ -235,25 +235,48 @@ const Country = () => {
   };
 
   const handleUpdateCountry = () => {
-    if (countryToEdit && updatedCountryName !== '') {
+    if (countryToEdit && updatedCountryName !== '' && isValidCountryName(updatedCountryName)) {
       updateCountryOnServer(countryToEdit.countryId, updatedCountryName);
       handleCloseEditModal();
       fetchData(); // Fetch fresh data after updating the country
-
+    } else {
+      console.error('Invalid country name');
+      // You may want to display an error message to the user here
     }
   };
   const handleEdit = (country) => {
-    const updatedCountryName = (country.countryName);
+    const updatedCountryName = country.countryName;
 
-    if (updatedCountryName !== null) {
+    if (updatedCountryName !== null && isValidCountryName(updatedCountryName)) {
       const updatedCountries = countries.map((c) =>
         c.countryId === country.countryId ? { ...c, countryName: updatedCountryName } : c
       );
 
       setCountries(updatedCountries);
       updateCountryOnServer(country.countryId, updatedCountryName);
+    } else {
+      console.error('Invalid country name');
+      // You may want to display an error message to the user here
     }
   };
+  const isValidCountryName = (countryName) => {
+    // Use regex to allow only A-Z and a-z characters
+    const regex = /^[A-Za-z]+$/;
+    return regex.test(countryName);
+  };
+  const handleCountryNameChange = (inputValue) => {
+    // Use regex to allow only alphabets
+    const alphabetRegex = /^[A-Za-z]+$/;
+  
+    if (alphabetRegex.test(inputValue) || inputValue === '') {
+      // Only update the state if the input is valid or empty
+      setUpdatedCountryName(inputValue);
+    }
+  };
+  
+
+
+
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -335,6 +358,7 @@ const Country = () => {
     const filteredDataToExport = filteredCountries.map((country) => ({
       countryId: country.countryId,
       countryName: country.countryName,
+      updatedAt: country.updatedAt
     }));
 
     // Create a worksheet
@@ -354,6 +378,8 @@ const Country = () => {
     const filteredDataToExport = filteredCountries.map((country) => ({
       countryId: country.countryId,
       countryName: country.countryName,
+      updatedAt: country.updatedAt
+
     }));
 
     // Create a CSV string
@@ -378,6 +404,8 @@ const Country = () => {
     const filteredDataToExport = filteredCountries.map((country) => ({
       countryId: country.countryId,
       countryName: country.countryName,
+      updatedAt: country.updatedAt
+
     }));
 
     // Create a PDF document
@@ -585,7 +613,9 @@ const Country = () => {
                         </div>
                       </div>
                       {currentCountries.length === 0 ? (
-                        <p>No data available</p>
+                        <div className="d-flex justify-content-center align-items-start" style={{ minHeight: '100vh' }}>
+                          <p>No data available</p>
+                        </div>
                       ) : (
                         <div className="row">
                           <div className="col-sm-12">
@@ -602,8 +632,11 @@ const Country = () => {
                                     colSpan={1}
                                     aria-sort="ascending"
                                     aria-label="#: activate to sort column descending"
+                                  //onClick={handleSort}
+
                                   >
-                                    #
+                                    Country Id
+                                    {sortOrder === 'asc' ? ' ▲' : ' ▼'}
                                   </th>
                                   <th
                                     style={{ width: 576, border: "1px solid #dee2e6", padding: "8px" }}
@@ -682,9 +715,12 @@ const Country = () => {
                                           type="text"
                                           placeholder="Enter country name"
                                           value={updatedCountryName}
-                                          onChange={(e) => setUpdatedCountryName(e.target.value)}
+                                          onChange={(e) => handleCountryNameChange(e.target.value)}
+                                          className={isValidCountryName(updatedCountryName) ? '' : 'error'}
+                                          title={isValidCountryName(updatedCountryName) ? '' : 'Invalid country name'}
                                         />
                                       </Form.Group>
+
                                     </Form>
                                   </Modal.Body>
                                   <Modal.Footer style={{ paddingTop: '0' }}>

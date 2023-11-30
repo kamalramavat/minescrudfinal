@@ -1,6 +1,5 @@
 import { useState } from "react";
 import Link from "next/link";
-import Sample from "./sample";
 
 const Sidebar = () => {
   const [activeMainMenu, setActiveMainMenu] = useState("Dashboard");

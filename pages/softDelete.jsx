@@ -1,25 +1,32 @@
 import React from 'react'
-import  { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Pagination from './components/pagination';
 import { getApiData } from '../pages/api/masterapi';
-
+import { Modal, Button, Form } from 'react-bootstrap';
 
 function SoftDelete() {
-    const [countries, setCountries] = useState([]);
+  const [countries, setCountries] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10); // Default to 10 items per page
   const [editData, setEditData] = useState(null); // State to store data being edited
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [showRestoreModal, setShowRestoreModal] = useState(false);
+  const [countryToRestore, setCountryToRestore] = useState(null);
+  const [showRestoreSuccessModal, setShowRestoreSuccessModal] = useState(false);
+  const [sortColumn, setSortColumn] = useState(null);
+  const [sortOrder, setSortOrder] = useState('asc');
+
 
   //const itemsPerPage = 10;
   //const token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzdXBlcmFkbWluQGdtYWlsLmNvbSIsImlhdCI6MTY5ODIzMzA0MywiZXhwIjozODQ1NzE2NjkwfQ.9NGroKV45c2A56PpaA_xkbPI5QTd_E1XdoF1Ru1wU1jIGT2UBYG4sH4mXMUDjBAooqsUVBSzE0xKpr89KcFwmQ'; // Replace with your actual token
   //const apiUrl = 'https://mines-manager.up.railway.app';
 
-  const apiUrl = 'http://13.233.251.86:8081';
+  const apiUrl = 'http://3.109.155.155:8081';
 
   const token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzdXBlcmFkbWluQGdtYWlsLmNvbSIsImlhdCI6MTcwMDQ3NzE2MywiZXhwIjozODQ3OTYwODEwfQ.r0m_f1jui6oyZprcBvTaBgR3Bt8mupeK_bQG5_UAsOAF6kcH1mJ9_YcrFJN__eol9qDi4WUbqvklG7M6KxtX6g';
-  
+
 
 
   useEffect(() => {
@@ -53,8 +60,8 @@ function SoftDelete() {
   }, [token, itemsPerPage, currentPage, searchTerm]);
 
 
-// Filter the data based on the search term
-const filteredCountries = countries.filter(country => {
+  // Filter the data based on the search term
+  const filteredCountries = countries.filter(country => {
     return country.countryName.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
@@ -75,8 +82,7 @@ const filteredCountries = countries.filter(country => {
     setCurrentPage(1); // Reset to the first page when changing items per page
   };
 
-  const restoreCountry = (countryId) => {
-    // Make a PUT request to restore the country with the given countryId
+  const restoreCountry = (countryId, countryName) => {
     fetch(`${apiUrl}/country/restore/${countryId}`, {
       method: 'PUT',
       headers: {
@@ -90,22 +96,113 @@ const filteredCountries = countries.filter(country => {
         return response.json();
       })
       .then(data => {
-        // Handle the response as needed
         console.log('Country restored successfully', data);
-        // Reload the page to reflect the updated data
-       // window.location.reload();
+        openRestoreSuccessModal(); // Open the success modal
+
+        // window.alert(`Country restored successfully.`);
+        // // You can choose to remove the following two lines if you don't want to log to the console and setSuccessMessage
+        // console.log('Country restored successfully', data);
+        // setSuccessMessage(`Country restored successfully.`);
       })
       .catch(error => {
         console.error('Error restoring country:', error);
       });
   };
+  const confirmRestore = (countryId, countryName) => {
+    const confirmMessage = `Do you want to restore the country ${countryName}?`;
 
+    if (window.confirm(confirmMessage)) {
+      restoreCountry(countryId);
+    } else {
+      // User clicked 'Cancel', do nothing or provide feedback
+    }
+  };
+
+  function SuccessMessage({ message, onClose }) {
+    return (
+      <div className="alert alert-success alert-dismissible fade show" role="alert">
+        {message}
+        <button type="button" className="btn-close" aria-label="Close" onClick={onClose}></button>
+      </div>
+    );
+  }
+  const openRestoreModal = (country) => {
+    setCountryToRestore(country);
+    setShowRestoreModal(true);
+  };
+
+  const handleCloseRestoreModal = () => {
+    setShowRestoreModal(false);
+  };
+
+  const handleConfirmRestore = () => {
+    if (countryToRestore) {
+      restoreCountry(countryToRestore.countryId, countryToRestore.countryName);
+      handleCloseRestoreModal();
+    }
+  };
+
+  const openRestoreSuccessModal = () => {
+    setShowRestoreSuccessModal(true);
+  };
+  const handleCloseRestoreSuccessModal = () => {
+    setShowRestoreSuccessModal(false);
+  };
+
+
+  //sorting code
+
+  // Code for Sorting Data
+
+  const handleSort = () => {
+    const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+    setSortOrder(newSortOrder);
+
+    const sortedCountries = [...countries].sort((a, b) => {
+      const nameA = a.countryName.toUpperCase();
+      const nameB = b.countryName.toUpperCase();
+
+      return newSortOrder === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+    });
+
+    setCountries(sortedCountries);
+  };
 
   return (
     <div>
+      {/* Restore Modal */}
+      <Modal show={showRestoreModal} onHide={handleCloseRestoreModal} centered backdrop="static" keyboard={false}>
+        <Modal.Header style={{ backgroundColor: '#113c62', color: 'white', paddingBottom: '0' }}>
+          <Modal.Title>Confirm Restore</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to restore {countryToRestore?.countryName}?
+        </Modal.Body>
+        <Modal.Footer style={{ paddingTop: '0' }}>
+          <Button variant="secondary" onClick={handleCloseRestoreModal} style={{ backgroundColor: '#113c62', color: 'white' }}>
+            Cancel
+          </Button>
+          <Button variant="success" onClick={handleConfirmRestore} style={{ backgroundColor: '#113c62', color: 'white' }}>
+            Restore
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      {/* Restore Success Modal */}
+      <Modal show={showRestoreSuccessModal} onHide={handleCloseRestoreSuccessModal} centered backdrop="static" keyboard={false}>
+        <Modal.Header style={{ backgroundColor: '#113c62', color: 'white', paddingBottom: '0' }}>
+          <Modal.Title>Restore Successful</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Country has been restored successfully.
+        </Modal.Body>
+        <Modal.Footer style={{ paddingTop: '0' }}>
+          <Button variant="success" onClick={handleCloseRestoreSuccessModal} style={{ backgroundColor: '#113c62', color: 'white' }}>
+            OK
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
-
-<div className="body d-flex py-lg-3 py-md-2">
+      <div className="body d-flex py-lg-3 py-md-2">
         <div className="container-fluid">
           <div className="row align-items-center">
             <div className="row text-center  py-2 no-bg bg-transparent d-flex align-items-center text-underline">
@@ -137,18 +234,18 @@ const filteredCountries = countries.filter(country => {
                   </Link>
                 </div> */}
                 <div className="row align-items-center">
-                <div className="border-0 mb-2">
-                  <div className="card-header py-2 no-bg bg-transparent d-flex align-items-center px-0 justify-content-between border-bottom flex-wrap">
-                    <nav aria-label="breadcrumb">
-                      {/* Breadcrumb code here */}
-                    </nav>
-                    <Link className="btn btn-primary btn-set-task w-sm-100" href="/country">
-                      <i className="icofont-arrow-left fs-6" />
-                      Back
-                    </Link>
+                  <div className="border-0 mb-2">
+                    <div className="card-header py-2 no-bg bg-transparent d-flex align-items-center px-0 justify-content-between border-bottom flex-wrap">
+                      <nav aria-label="breadcrumb">
+                        {/* Breadcrumb code here */}
+                      </nav>
+                      <Link className="btn btn-primary btn-set-task w-sm-100" href="/country">
+                        <i className="icofont-arrow-left fs-6" />
+                        Back
+                      </Link>
+                    </div>
                   </div>
                 </div>
-              </div>
               </div>
             </div>
           </div>
@@ -211,39 +308,46 @@ const filteredCountries = countries.filter(country => {
                         </div>
                       </div>
                       {currentCountries.length === 0 ? (
-        <p>No data available</p>
-      ) : (
-                      <div className="row">
-                        <div className="col-sm-12">
-                          <table id="myDataTable" className="table table-hover align-middle mb-0 nowrap dataTable no-footer dtr-inline" style={{ width: "100%" }} role="grid" aria-describedby="myDataTable_info">
-                            <thead>
-                              <tr role="row">
-                                <th
-                                  style={{ width: 576 }}
-                                  className="sorting_asc"
-                                  tabIndex={0}
-                                  aria-controls="myDataTable"
-                                  rowSpan={1}
-                                  colSpan={1}
-                                  aria-sort="ascending"
-                                  aria-label="#: activate to sort column descending"
-                                >
-                                  #
-                                </th>
-                                <th
-                                  style={{ width: 576 }}
-                                  className="sorting_asc"
-                                  tabIndex={0}
-                                  aria-controls="myDataTable"
-                                  rowSpan={1}
-                                  colSpan={1}
-                                  aria-sort="ascending"
-                                  aria-label="#: activate to sort column descending"
-                                >
-                                  Country Name
-                                </th>
+                       <div className="d-flex justify-content-center align-items-start" style={{ minHeight: '100vh' }}>
+                       <p>No data available</p>
+                     </div>
+                      ) : (
+                        <div className="row">
+                          <div className="col-sm-12">
+                            <table id="myDataTable" className="table table-hover align-middle mb-0 nowrap dataTable no-footer dtr-inline" style={{ width: "100%" }} role="grid" aria-describedby="myDataTable_info">
+                              <thead>
+                                <tr role="row">
+                                  <th
+                                    style={{ width: 576 }}
+                                    className="sorting_asc"
+                                    tabIndex={0}
+                                    aria-controls="myDataTable"
+                                    rowSpan={1}
+                                    colSpan={1}
+                                    aria-sort="ascending"
+                                    aria-label="#: activate to sort column descending"
+                                    onClick={handleSort}
 
-                                {/* <th
+                                  >
+                                    Country Id
+                                    {sortOrder === 'asc' ? ' ▲' : ' ▼'}
+                                  </th>
+                                  <th
+                                    style={{ width: 576 }}
+                                    className="sorting_asc"
+                                    tabIndex={0}
+                                    aria-controls="myDataTable"
+                                    rowSpan={1}
+                                    colSpan={1}
+                                    aria-sort="ascending"
+                                    aria-label="#: activate to sort column descending"
+                                    onClick={handleSort}
+                                  >
+                                    Country Name
+                                    {sortOrder === 'asc' ? ' ▲' : ' ▼'}
+                                  </th>
+
+                                  {/* <th
                                   style={{ width: 723 }}
                                   className="sorting"
                                   tabIndex={0}
@@ -254,50 +358,50 @@ const filteredCountries = countries.filter(country => {
                                 >
                                   Status
                                 </th> */}
-                                <th
-                                  style={{ width: 65 }}
-                                  className="sorting"
-                                  tabIndex={0}
-                                  aria-controls="myDataTable"
-                                  rowSpan={1}
-                                  colSpan={1}
-                                  aria-label="Actions: activate to sort column ascending"
-                                >
-                                  Actions
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody className="mb-4">
+                                  <th
+                                    style={{ width: 65 }}
+                                    className="sorting"
+                                    tabIndex={0}
+                                    aria-controls="myDataTable"
+                                    rowSpan={1}
+                                    colSpan={1}
+                                    aria-label="Actions: activate to sort column ascending"
+                                  >
+                                    Actions
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody className="mb-4">
 
-                              {currentCountries.map((country, index) => (
-                                <tr role="row" className="even" key={`${country.countryId}-${index}`}>
-                                  <td>{country.countryId}</td>
-                                  <td >{country.countryName}</td>
-                                  {/* <td >{country.stateName}</td> */}
-                                  {/* <td >{country.status ? "Active" : "Inactive"}</td> */}
+                                {currentCountries.map((country, index) => (
+                                  <tr role="row" className="even" key={`${country.countryId}-${index}`}>
+                                    <td>{country.countryId}</td>
+                                    <td >{country.countryName}</td>
+                                    {/* <td >{country.stateName}</td> */}
+                                    {/* <td >{country.status ? "Active" : "Inactive"}</td> */}
 
 
-                                  <td className="btn-group" role="group">
-                                  <button
-                className="edit btn btn-outline-secondary"
-                style={{ display: "inline" }}
-                onClick={() => restoreCountry(country.countryId)}
-              >
-                <i className="icofont-undo" style={{ fontSize: "medium" }} />
-              </button>
-                                    <Link
-                                      className="edit btn btn-outline-secondary"
-                                      style={{ display: "inline" }}
-                                      onClick={() => confirmDelete(country.countryId)}
-                                      href="#"
+                                    <td className="btn-group" role="group">
+                                      <button
+                                        className="edit btn btn-outline-secondary"
+                                        style={{ display: "inline" }}
+                                        onClick={() => openRestoreModal(country)}
+                                      >
+                                        <i className="icofont-undo" style={{ fontSize: "medium" }} />
+                                      </button>
+                                      <Link
+                                        className="edit btn btn-outline-secondary"
+                                        style={{ display: "inline" }}
+                                        onClick={() => confirmDelete(country.countryId)}
+                                        href="#"
 
-                                    >
-                                      <i
-                                        className="icofont-trash text-danger"
-                                        style={{ fontSize: "medium" }}
-                                      />
-                                    </Link>
-                                    {/* <form
+                                      >
+                                        <i
+                                          className="icofont-trash text-danger"
+                                          style={{ fontSize: "medium" }}
+                                        />
+                                      </Link>
+                                      {/* <form
                                     action="http://mines-manager.com/state/6"
                                     method="POST"
                                   >
@@ -323,17 +427,17 @@ const filteredCountries = countries.filter(country => {
                                       />
                                     </button>
                                   </form> */}
-                                  </td>
-                                </tr>
+                                    </td>
+                                  </tr>
 
 
-                              ))}
+                                ))}
 
-                            </tbody>
-                          </table>
+                              </tbody>
+                            </table>
+                          </div>
                         </div>
-                      </div>
-                       )}
+                      )}
                       <div className="row">
                         <div className="col-sm-12 col-md-5">
                           <div
@@ -354,6 +458,8 @@ const filteredCountries = countries.filter(country => {
                               currentPage={currentPage}
                               totalPages={totalPages}
                               onPageChange={handlePageChange}
+                              sortOrder={sortOrder}
+                              handleSort={handleSort}
                             />
                           </div>
                         </div>
