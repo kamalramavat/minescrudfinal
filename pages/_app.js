@@ -4,7 +4,6 @@ import { store } from "../store/store";
 import { Provider } from "react-redux";
 import Country from "./country";
 import Edit from "./components/Edit";
-import Sample from "./components/sample";
 
 function MyApp({ Component, pageProps }) {
   return (
