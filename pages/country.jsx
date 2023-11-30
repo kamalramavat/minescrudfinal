@@ -267,13 +267,13 @@ const Country = () => {
   const handleCountryNameChange = (inputValue) => {
     // Use regex to allow only alphabets
     const alphabetRegex = /^[A-Za-z]+$/;
-  
+
     if (alphabetRegex.test(inputValue) || inputValue === '') {
       // Only update the state if the input is valid or empty
       setUpdatedCountryName(inputValue);
     }
   };
-  
+
 
 
 
@@ -689,15 +689,17 @@ const Country = () => {
                                         style={{ display: "inline" }}
                                         onClick={() => handleShowEditModal(country)}
                                       >
-                                        <i className="icofont-edit text-success" style={{ fontSize: "medium" }} />
+                                        <i className="icofont icofont-edit text-success" style={{ fontSize: "medium" }} />
                                       </button>
+
                                       <button
-                                        className="edit btn btn-outline-secondary"
+                                        className="delete btn btn-outline-secondary"
                                         style={{ display: "inline" }}
                                         onClick={() => handleShowDeleteModal(country)}
                                       >
-                                        <i className="icofont-trash text-danger" style={{ fontSize: "medium" }} />
+                                        <i className="icofont icofont-trash text-danger" style={{ fontSize: "medium" }} />
                                       </button>
+
                                     </td>
                                   </tr>
                                 ))}
