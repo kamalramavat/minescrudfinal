@@ -13,7 +13,7 @@ import { Modal, Button, Form } from 'react-bootstrap';
 
 
 
-const Country = () => {
+const Country = ( countryId, handleShowViewModal, handleCloseViewModal) => {
 
   const [countries, setCountries] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -89,7 +89,7 @@ const Country = () => {
   //   }
   // };
 
-  const handlePageChange = (page) => {
+  const handlePageChange = (page) => {countryID
     setCurrentPage(page);
   }
 
@@ -467,22 +467,63 @@ const Country = () => {
 
     setCountries(sortedCountries);
   };
+  const handleShowViewModal1 = (country) => {
+    setSelectedCountry(country.countryName);
+    // Additional logic for displaying the modal can be added here
+  };
+  const handleCloseModal = () => {
+    // Implement your logic to close the modal
+    // This might involve setting a state variable or calling a function from your modal component
+    // For example, if you are using React state:
+    // setModalOpen(false);
+
+    // If you have a function in your modal component to handle closing:
+    // closeModal();
+    
+    // You can also pass handleCloseViewModal as a prop to the modal component
+    // and call it directly from there.
+    handleCloseViewModal();
+  };
+
+  const handleClick = async () => {
+    
+  const apiUrl = 'http://15.206.148.100:8081';
+
+  const token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzdXBlcmFkbWluQGdtYWlsLmNvbSIsImlhdCI6MTcwMDQ3NzE2MywiZXhwIjozODQ3OTYwODEwfQ.r0m_f1jui6oyZprcBvTaBgR3Bt8mupeK_bQG5_UAsOAF6kcH1mJ9_YcrFJN__eol9qDi4WUbqvklG7M6KxtX6g';
 
 
-  const handleShowViewModal = (country) => {
-    if (!country) {
-      console.error('Error: Country object is not defined.');
-      return;
+    try {
+      const updateUrl = `${apiUrl}/country/${countryId}`;
+
+      // Make a fetch request to your updated server endpoint to get the countryName
+      const response = await fetch(updateUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `${token}`
+        },
+        credentials: 'include',
+
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch country information');
+      }
+
+      const data = await response.json();
+      const countryName = data.countryName;
+
+      // Show an alert with the fetched country name
+      alert(`Clicked on ${countryName}`);
+
+      // If you also want to trigger the modal, you can call the handleShowViewModal function
+      handleShowViewModal({ countryId, countryName });
+    } catch (error) {
+      console.error(error);
+      alert('Failed to fetch country information');
     }
-
-    setSelectedCountry(country);
-    setIsViewModalOpen(true);
   };
 
-  const handleCloseViewModal = () => {
-    setSelectedCountry(null);
-    setIsViewModalOpen(false);
-  };
 
   return (
     <div>
@@ -770,16 +811,21 @@ const Country = () => {
                                       <button
                                         className="view btn btn-outline-secondary"
                                         style={{ display: "inline" }}
-                                        onClick={() => handleShowViewModal(country)}
-                                      >
+                                        onClick={handleClick}
+                                        >
                                         <i className="icofont icofont-eye text-primary" style={{ fontSize: "medium" }} />
                                       </button>
-
 
                                     </td>
                                   </tr>
                                 ))}
-
+                                {/* Modal or other component to display the countryName */}
+                                {selectedCountry && (
+                                  <div>
+                                    <h2>Selected Country: {selectedCountry}</h2>
+                                    {/* Other modal content */}
+                                  </div>
+                                )}
                                 {/* Edit Modal */}
                                 <Modal show={showEditModal} onHide={handleCloseEditModal} centered>
                                   <Modal.Header style={{ backgroundColor: '#113c62', color: 'white', paddingBottom: '0' }}>
