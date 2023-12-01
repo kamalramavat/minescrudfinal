@@ -35,7 +35,7 @@ const AddCountry = () => {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(formDataWithTrueStatus), // Use formDataWithTrueStatus
       });
 
       if (response.ok) {
@@ -46,7 +46,7 @@ const AddCountry = () => {
         showAlert('success', `${formData.countryName} has been successfully added.`);
 
         // Reset form data
-        setFormData({ countryName: '', status: false });
+        setFormData({ countryName: '', status: true });
       } else {
         const errorData = await response.json(); // Assuming your API returns error details in the response body
         console.log('Error while adding country:', errorData);
@@ -61,6 +61,11 @@ const AddCountry = () => {
       showAlert('danger', 'An error occurred while processing your request.');
     }
   };
+  const formDataWithTrueStatus = {
+    ...formData,
+    status: true,
+  };
+  console.log(formDataWithTrueStatus);
 
 
   const isValidCountryName = (countryName) => {
@@ -168,7 +173,7 @@ const AddCountry = () => {
                         Save
                         <i className="fa fa-send ms-2" />
                       </button>
-                      <button type="button" className="btn btn-danger text-white" onClick={() => setFormData({ countryName: '', status: false })}>
+                      <button type="button" className="btn btn-danger text-white" onClick={() => setFormData({ countryName: '', status: true })}>
                         Reset
                         <i className="fa fa-refresh ms-2" />
                       </button>

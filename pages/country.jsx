@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Pagination from './components/pagination';
 import { Dropdown, DropdownButton } from 'react-bootstrap';
@@ -28,6 +28,12 @@ const Country = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [updatedCountryName, setUpdatedCountryName] = useState('');
   const [countryToEdit, setCountryToEdit] = useState(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [showImportSuccessModal, setShowImportSuccessModal] = useState(false);
+  const [importSuccessMessage, setImportSuccessMessage] = useState('');
+  const fileInputRef = useRef(null);
 
 
 
@@ -289,6 +295,8 @@ const Country = () => {
       return;
     }
 
+    setLoading(true);
+
     const formData = new FormData();
     formData.append('file', importedFile);
 
@@ -306,11 +314,12 @@ const Country = () => {
       }
 
       const data = await response.json();
-      //setImportedCountryCount(data.totalCount);
-      //alert(`Successfully imported ${data.totalCount} countries.`);
-      alert(`Successfully imported countries.`);
+      setImportedCountryCount(data.totalCount);
+      setImportSuccessMessage(data.message);
 
-      // Fetch the updated list of countries
+      // Show the Import Success Modal
+      setShowImportSuccessModal(true);
+
       const updatedResponse = await fetch(`${apiUrl}/country`, {
         method: 'GET',
         headers: {
@@ -332,12 +341,21 @@ const Country = () => {
       console.error('Error importing countries:', error);
       alert('Failed to import countries. Please try again.');
     } finally {
-      // Clear the file input
       setImportedFile(null);
-      // Close the modal
       setIsImportModalOpen(false);
+      setLoading(false);
     }
   };
+
+
+  const handleCloseImportSuccessModal = () => {
+    setShowImportSuccessModal(false);
+    setImportSuccessMessage('');
+    // Clear the file input value
+    fileInputRef.current.value = '';
+  };
+
+
 
   const handleDownloadSampleCSV = () => {
     const sampleData = [
@@ -352,7 +370,6 @@ const Country = () => {
     const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
     FileSaver.saveAs(data, 'countries.csv');
   };
-  // Ccode to export excel
   const handleExportToExcel = () => {
     // Extract countryId and countryName from the filtered countries array
     const filteredDataToExport = filteredCountries.map((country) => ({
@@ -360,6 +377,11 @@ const Country = () => {
       countryName: country.countryName,
       updatedAt: country.updatedAt
     }));
+
+    if (filteredDataToExport.length === 0) {
+      alert("No data available for export");
+      return;
+    }
 
     // Create a worksheet
     const ws = XLSX.utils.json_to_sheet(filteredDataToExport);
@@ -372,15 +394,18 @@ const Country = () => {
     XLSX.writeFile(wb, 'filtered_country_data.xlsx');
   };
 
-
   const handleExportToCSV = () => {
     // Extract countryId and countryName from the filtered countries array
     const filteredDataToExport = filteredCountries.map((country) => ({
       countryId: country.countryId,
       countryName: country.countryName,
       updatedAt: country.updatedAt
-
     }));
+
+    if (filteredDataToExport.length === 0) {
+      alert("No data available for export");
+      return;
+    }
 
     // Create a CSV string
     const csvData = [
@@ -441,6 +466,22 @@ const Country = () => {
     });
 
     setCountries(sortedCountries);
+  };
+
+
+  const handleShowViewModal = (country) => {
+    if (!country) {
+      console.error('Error: Country object is not defined.');
+      return;
+    }
+
+    setSelectedCountry(country);
+    setIsViewModalOpen(true);
+  };
+
+  const handleCloseViewModal = () => {
+    setSelectedCountry(null);
+    setIsViewModalOpen(false);
   };
 
   return (
@@ -542,12 +583,39 @@ const Country = () => {
                   {/* Close button to close the modal */}
                   <button type="button" className="btn btn-secondary" onClick={() => setIsImportModalOpen(false)}>Close</button>
                   {/* Button to trigger the import process */}
-                  <button type="button" className="btn btn-primary" onClick={handleImport}>Import</button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileUpload}
+                  />
+                  <Button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleImport}
+                    disabled={loading}
+                  >
+                    Import
+                  </Button>
+                  {loading && <p>Loading...</p>}
+
                 </div>
               </div>
             </div>
           </div>
-
+          {/* Import Success Modal */}
+          <Modal show={showImportSuccessModal} onHide={handleCloseImportSuccessModal} centered backdrop="static" keyboard={false}>
+            <Modal.Header style={{ backgroundColor: '#113c62', color: 'white', paddingBottom: '0' }}>
+              <Modal.Title>Import Successful</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              {importSuccessMessage || 'Data has been imported successfully.'}
+            </Modal.Body>
+            <Modal.Footer style={{ paddingTop: '0' }}>
+              <Button variant="success" onClick={handleCloseImportSuccessModal} style={{ backgroundColor: '#113c62', color: 'white' }}>
+                OK
+              </Button>
+            </Modal.Footer>
+          </Modal>
           {/* Display total imported country count */}
           {importedCountryCount > 0 && (
             <div className="alert alert-success mt-3" role="alert">
@@ -699,6 +767,14 @@ const Country = () => {
                                       >
                                         <i className="icofont icofont-trash text-danger" style={{ fontSize: "medium" }} />
                                       </button>
+                                      <button
+                                        className="view btn btn-outline-secondary"
+                                        style={{ display: "inline" }}
+                                        onClick={() => handleShowViewModal(country)}
+                                      >
+                                        <i className="icofont icofont-eye text-primary" style={{ fontSize: "medium" }} />
+                                      </button>
+
 
                                     </td>
                                   </tr>
@@ -751,6 +827,25 @@ const Country = () => {
                                       Delete
                                     </Button>
                                   </Modal.Footer>
+                                </Modal>
+                                {/* Modal for viewing country details */}
+                                <Modal
+                                  isOpen={isViewModalOpen}
+                                  onRequestClose={handleCloseViewModal}
+                                  contentLabel="View Country Modal"
+                                // Add your modal styling here
+                                >
+                                  {selectedCountry && (
+                                    <div>
+                                      {/* Display country details in the modal */}
+                                      <h2>Country Details</h2>
+                                      <p>Country Name: {selectedCountry.countryName}</p>
+
+                                      {/* Add more details as needed */}
+
+                                      <button onClick={handleCloseViewModal}>Close</button>
+                                    </div>
+                                  )}
                                 </Modal>
                               </tbody>
                             </table>
