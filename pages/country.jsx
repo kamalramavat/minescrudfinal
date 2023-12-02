@@ -91,10 +91,10 @@ const Country = (countryId, handleShowViewModal, handleCloseViewModal) => {
 
   // Assuming countryID is declared somewhere else in the code
 
-const handlePageChange = (page) => {
-  // Use countryID as needed
-  setCurrentPage(page);
-}
+  const handlePageChange = (page) => {
+    // Use countryID as needed
+    setCurrentPage(page);
+  }
 
 
 
@@ -461,7 +461,7 @@ const handlePageChange = (page) => {
   const handleSort = (column) => {
     const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
     setSortOrder(newSortOrder);
-  
+
     const sortedCountries = [...countries].sort((a, b) => {
       if (column === 'countryId') {
         return newSortOrder === 'asc' ? a.countryId - b.countryId : b.countryId - a.countryId;
@@ -472,10 +472,10 @@ const handlePageChange = (page) => {
       }
       return 0;
     });
-  
+
     setCountries(sortedCountries);
   };
-  
+
   const handleShowViewModal1 = (country) => {
     setSelectedCountry(country.countryName);
     // Additional logic for displaying the modal can be added here
@@ -762,7 +762,7 @@ const handlePageChange = (page) => {
                                     aria-sort={sortOrder}
                                     aria-label="#: activate to sort column descending"
                                     onClick={() => handleSort('countryName')}
-                                    >
+                                  >
                                     Country Name
                                     {sortOrder === 'asc' ? ' ▲' : ' ▼'}
                                   </th>

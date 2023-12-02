@@ -154,19 +154,24 @@ function SoftDelete() {
 
   // Code for Sorting Data
 
-  const handleSort = () => {
+  const handleSort = (column) => {
     const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
     setSortOrder(newSortOrder);
 
     const sortedCountries = [...countries].sort((a, b) => {
-      const nameA = a.countryName.toUpperCase();
-      const nameB = b.countryName.toUpperCase();
-
-      return newSortOrder === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+      if (column === 'countryId') {
+        return newSortOrder === 'asc' ? a.countryId - b.countryId : b.countryId - a.countryId;
+      } else if (column === 'countryName') {
+        const nameA = a.countryName.toUpperCase();
+        const nameB = b.countryName.toUpperCase();
+        return newSortOrder === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+      }
+      return 0;
     });
 
     setCountries(sortedCountries);
   };
+
 
   return (
     <div>
@@ -325,7 +330,7 @@ function SoftDelete() {
                                     colSpan={1}
                                     aria-sort="ascending"
                                     aria-label="#: activate to sort column descending"
-                                    onClick={handleSort}
+                                    onClick={() => handleSort('countryId')}
 
                                   >
                                     Country Id
@@ -340,7 +345,7 @@ function SoftDelete() {
                                     colSpan={1}
                                     aria-sort="ascending"
                                     aria-label="#: activate to sort column descending"
-                                    onClick={handleSort}
+                                    onClick={() => handleSort('countryName')}
                                   >
                                     Country Name
                                     {sortOrder === 'asc' ? ' ▲' : ' ▼'}
