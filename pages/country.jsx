@@ -555,7 +555,7 @@ const Country = ( countryId, handleShowViewModal, handleCloseViewModal) => {
                   <div className="row justify-content-end align-items-center">
                     <div className="col-md-3 mb-2">
                       <Link className="btn btn-primary mx-1 btn-set-task w-100" href="/addCountry">
-                        <i className="icofont-plus-circle me-2 fs-6" /> Add
+                      <i class="bi bi-box-arrow-in-down me-2"></i> Add
                       </Link>
                     </div>
                     <div className="col-md-3 mb-2">
@@ -804,14 +804,15 @@ const Country = ( countryId, handleShowViewModal, handleCloseViewModal) => {
                                         style={{ display: "inline" }}
                                         onClick={() => handleShowDeleteModal(country)}
                                       >
-                                        <i className="icofont icofont-trash text-danger" style={{ fontSize: "medium" }} />
+                                        <i class="bi bi-trash3-fill"></i>
+
                                       </button>
                                       <button
                                         className="view btn btn-outline-secondary"
                                         style={{ display: "inline" }}
                                         onClick={handleClick}
                                         >
-                                        <i className="icofont icofont-eye text-primary" style={{ fontSize: "medium" }} />
+<i class="bi bi-display"></i>
                                       </button>
 
                                     </td>
