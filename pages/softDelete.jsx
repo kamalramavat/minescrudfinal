@@ -240,8 +240,7 @@ function SoftDelete() {
                         {/* Breadcrumb code here */}
                       </nav>
                       <Link className="btn btn-primary btn-set-task w-sm-100" href="/country">
-                        <i className="icofont-arrow-left fs-6" />
-                        Back
+                      <i class="bi bi-backspace-fill me-2"></i>                        Back
                       </Link>
                     </div>
                   </div>
