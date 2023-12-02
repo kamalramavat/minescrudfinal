@@ -13,7 +13,7 @@ import { Modal, Button, Form } from 'react-bootstrap';
 
 
 
-const Country = ( countryId, handleShowViewModal, handleCloseViewModal) => {
+const Country = (countryId, handleShowViewModal, handleCloseViewModal) => {
 
   const [countries, setCountries] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -89,7 +89,8 @@ const Country = ( countryId, handleShowViewModal, handleCloseViewModal) => {
   //   }
   // };
 
-  const handlePageChange = (page) => {countryID
+  const handlePageChange = (page) => {
+    countryID
     setCurrentPage(page);
   }
 
@@ -479,17 +480,17 @@ const Country = ( countryId, handleShowViewModal, handleCloseViewModal) => {
 
     // If you have a function in your modal component to handle closing:
     // closeModal();
-    
+
     // You can also pass handleCloseViewModal as a prop to the modal component
     // and call it directly from there.
     handleCloseViewModal();
   };
 
   const handleClick = async () => {
-    
-  const apiUrl = 'http://15.206.148.100:8081';
 
-  const token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzdXBlcmFkbWluQGdtYWlsLmNvbSIsImlhdCI6MTcwMDQ3NzE2MywiZXhwIjozODQ3OTYwODEwfQ.r0m_f1jui6oyZprcBvTaBgR3Bt8mupeK_bQG5_UAsOAF6kcH1mJ9_YcrFJN__eol9qDi4WUbqvklG7M6KxtX6g';
+    const apiUrl = 'http://15.206.148.100:8081';
+
+    const token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzdXBlcmFkbWluQGdtYWlsLmNvbSIsImlhdCI6MTcwMDQ3NzE2MywiZXhwIjozODQ3OTYwODEwfQ.r0m_f1jui6oyZprcBvTaBgR3Bt8mupeK_bQG5_UAsOAF6kcH1mJ9_YcrFJN__eol9qDi4WUbqvklG7M6KxtX6g';
 
 
     try {
@@ -505,7 +506,7 @@ const Country = ( countryId, handleShowViewModal, handleCloseViewModal) => {
         credentials: 'include',
 
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch country information');
       }
@@ -555,7 +556,7 @@ const Country = ( countryId, handleShowViewModal, handleCloseViewModal) => {
                   <div className="row justify-content-end align-items-center">
                     <div className="col-md-3 mb-2">
                       <Link className="btn btn-primary mx-1 btn-set-task w-100" href="/addCountry">
-                      <i class="bi bi-box-arrow-in-down me-2"></i> Add
+                        <i class="bi bi-box-arrow-in-down me-2"></i> Add
                       </Link>
                     </div>
                     <div className="col-md-3 mb-2">
@@ -614,7 +615,7 @@ const Country = ( countryId, handleShowViewModal, handleCloseViewModal) => {
                       {/* File input for choosing a CSV file */}
                       {/* <input type="file" accept=".csv" className="form-control mx-auto" style={{ backgroundColor: 'white', color: 'black' }} onChange={handleFileUpload} /> */}
                       <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".csv" className="form-control mx-auto" style={{ backgroundColor: 'white', color: 'black' }} />
-                 
+
                       {/* <input type="file" accept=".csv" onChange={handleFileUpload} /> */}
                     </div>
                   </div>
@@ -804,14 +805,14 @@ const Country = ( countryId, handleShowViewModal, handleCloseViewModal) => {
                                         style={{ display: "inline" }}
                                         onClick={() => handleShowDeleteModal(country)}
                                       >
-<i class="bi bi-trash-fill"></i>
+                                        <i class="bi bi-trash-fill"></i>
                                       </button>
                                       <button
                                         className="view btn btn-outline-secondary"
                                         style={{ display: "inline" }}
                                         onClick={handleClick}
-                                        >
-<i class="bi bi-display"></i>
+                                      >
+                                        <i class="bi bi-display"></i>
                                       </button>
 
                                     </td>

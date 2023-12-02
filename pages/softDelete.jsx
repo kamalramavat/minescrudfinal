@@ -308,9 +308,9 @@ function SoftDelete() {
                         </div>
                       </div>
                       {currentCountries.length === 0 ? (
-                       <div className="d-flex justify-content-center align-items-start" style={{ minHeight: '100vh' }}>
-                       <p>No data available</p>
-                     </div>
+                        <div className="d-flex justify-content-center align-items-start" style={{ minHeight: '100vh' }}>
+                          <p>No data available</p>
+                        </div>
                       ) : (
                         <div className="row">
                           <div className="col-sm-12">
@@ -387,8 +387,7 @@ function SoftDelete() {
                                         style={{ display: "inline" }}
                                         onClick={() => openRestoreModal(country)}
                                       >
-                                        <i className="icofont-undo" style={{ fontSize: "medium" }} />
-                                      </button>
+                                        <i class="bi bi-bootstrap-reboot"></i>                                      </button>
                                       <Link
                                         className="edit btn btn-outline-secondary"
                                         style={{ display: "inline" }}
@@ -396,10 +395,8 @@ function SoftDelete() {
                                         href="#"
 
                                       >
-                                        <i
-                                          className="icofont-trash text-danger"
-                                          style={{ fontSize: "medium" }}
-                                        />
+                                        <i class="bi bi-trash-fill"></i>
+
                                       </Link>
                                       {/* <form
                                     action="http://mines-manager.com/state/6"
