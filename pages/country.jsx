@@ -804,8 +804,7 @@ const Country = ( countryId, handleShowViewModal, handleCloseViewModal) => {
                                         style={{ display: "inline" }}
                                         onClick={() => handleShowDeleteModal(country)}
                                       >
-                                        <i class="bi bi-trash3-fill"></i>
-
+<i class="bi bi-trash-fill"></i>
                                       </button>
                                       <button
                                         className="view btn btn-outline-secondary"
