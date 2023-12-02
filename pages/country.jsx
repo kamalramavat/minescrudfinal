@@ -89,10 +89,13 @@ const Country = (countryId, handleShowViewModal, handleCloseViewModal) => {
   //   }
   // };
 
-  const handlePageChange = (page) => {
-    countryID
-    setCurrentPage(page);
-  }
+  // Assuming countryID is declared somewhere else in the code
+
+const handlePageChange = (page) => {
+  // Use countryID as needed
+  setCurrentPage(page);
+}
+
 
 
   const handleCloseDeleteModal = () => {
