@@ -612,8 +612,9 @@ const Country = ( countryId, handleShowViewModal, handleCloseViewModal) => {
 
                       <h5>Import Countries.csv file from existing file</h5>
                       {/* File input for choosing a CSV file */}
-                      <input type="file" accept=".csv" className="form-control mx-auto" style={{ backgroundColor: 'white', color: 'black' }} onChange={handleFileUpload} />
-
+                      {/* <input type="file" accept=".csv" className="form-control mx-auto" style={{ backgroundColor: 'white', color: 'black' }} onChange={handleFileUpload} /> */}
+                      <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".csv" className="form-control mx-auto" style={{ backgroundColor: 'white', color: 'black' }} />
+                 
                       {/* <input type="file" accept=".csv" onChange={handleFileUpload} /> */}
                     </div>
                   </div>
@@ -624,11 +625,6 @@ const Country = ( countryId, handleShowViewModal, handleCloseViewModal) => {
                   {/* Close button to close the modal */}
                   <button type="button" className="btn btn-secondary" onClick={() => setIsImportModalOpen(false)}>Close</button>
                   {/* Button to trigger the import process */}
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileUpload}
-                  />
                   <Button
                     type="button"
                     className="btn btn-primary"
@@ -798,6 +794,8 @@ const Country = ( countryId, handleShowViewModal, handleCloseViewModal) => {
                                         style={{ display: "inline" }}
                                         onClick={() => handleShowEditModal(country)}
                                       >
+                                        <i class="bi bi-pen"></i>
+
                                         <i className="icofont icofont-edit text-success" style={{ fontSize: "medium" }} />
                                       </button>
 
