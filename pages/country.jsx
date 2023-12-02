@@ -796,7 +796,7 @@ const Country = ( countryId, handleShowViewModal, handleCloseViewModal) => {
                                       >
                                         <i class="bi bi-pen"></i>
 
-                                        <i className="icofont icofont-edit text-success" style={{ fontSize: "medium" }} />
+                                        {/* <i className="icofont icofont-edit text-success" style={{ fontSize: "medium" }} /> */}
                                       </button>
 
                                       <button
