@@ -69,8 +69,8 @@ const AddCountry = () => {
 
 
   const isValidCountryName = (countryName) => {
-    // Use regex to allow only A-Z and a-z characters
-    const regex = /^[A-Za-z\s]+$/;
+    // Use regex to allow A-Z, a-z, and spaces
+    const regex = /^[a-zA-Z ]{3,}$/;
     return regex.test(countryName);
   };
   
@@ -184,6 +184,9 @@ const AddCountry = () => {
           </div>
         </div>
       </div>
+
+
+
 
       <Modal
         isOpen={isModalOpen}

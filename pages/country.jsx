@@ -271,12 +271,12 @@ const handlePageChange = (page) => {
   };
   const isValidCountryName = (countryName) => {
     // Use regex to allow only A-Z and a-z characters
-    const regex = /^[A-Za-z]+$/;
+    const regex = /^[a-zA-Z ]{3,}$/;
     return regex.test(countryName);
   };
   const handleCountryNameChange = (inputValue) => {
     // Use regex to allow only alphabets
-    const alphabetRegex = /^[A-Za-z]+$/;
+    const alphabetRegex = /^[a-zA-Z ]{3,}$/;
 
     if (alphabetRegex.test(inputValue) || inputValue === '') {
       // Only update the state if the input is valid or empty
@@ -458,19 +458,24 @@ const handlePageChange = (page) => {
   // Code for Sorting Data
   const [sortOrder, setSortOrder] = useState('asc'); // 'asc' or 'desc'
 
-  const handleSort = () => {
+  const handleSort = (column) => {
     const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
     setSortOrder(newSortOrder);
-
+  
     const sortedCountries = [...countries].sort((a, b) => {
-      const nameA = a.countryName.toUpperCase();
-      const nameB = b.countryName.toUpperCase();
-
-      return newSortOrder === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+      if (column === 'countryId') {
+        return newSortOrder === 'asc' ? a.countryId - b.countryId : b.countryId - a.countryId;
+      } else if (column === 'countryName') {
+        const nameA = a.countryName.toUpperCase();
+        const nameB = b.countryName.toUpperCase();
+        return newSortOrder === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+      }
+      return 0;
     });
-
+  
     setCountries(sortedCountries);
   };
+  
   const handleShowViewModal1 = (country) => {
     setSelectedCountry(country.countryName);
     // Additional logic for displaying the modal can be added here
@@ -741,7 +746,7 @@ const handlePageChange = (page) => {
                                     colSpan={1}
                                     aria-sort="ascending"
                                     aria-label="#: activate to sort column descending"
-                                  //onClick={handleSort}
+                                    onClick={() => handleSort('countryId')}
 
                                   >
                                     Country Id
@@ -756,8 +761,8 @@ const handlePageChange = (page) => {
                                     colSpan={1}
                                     aria-sort={sortOrder}
                                     aria-label="#: activate to sort column descending"
-                                    onClick={handleSort}
-                                  >
+                                    onClick={() => handleSort('countryName')}
+                                    >
                                     Country Name
                                     {sortOrder === 'asc' ? ' ▲' : ' ▼'}
                                   </th>
