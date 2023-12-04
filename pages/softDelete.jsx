@@ -17,14 +17,14 @@ function SoftDelete() {
   const [showRestoreSuccessModal, setShowRestoreSuccessModal] = useState(false);
   const [sortColumn, setSortColumn] = useState(null);
   const [sortOrder, setSortOrder] = useState('asc');
+  const [showErrorModal, setShowErrorModal] = useState(false); // Add this line
 
 
   //const itemsPerPage = 10;
   //const token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzdXBlcmFkbWluQGdtYWlsLmNvbSIsImlhdCI6MTY5ODIzMzA0MywiZXhwIjozODQ1NzE2NjkwfQ.9NGroKV45c2A56PpaA_xkbPI5QTd_E1XdoF1Ru1wU1jIGT2UBYG4sH4mXMUDjBAooqsUVBSzE0xKpr89KcFwmQ'; // Replace with your actual token
   //const apiUrl = 'https://mines-manager.up.railway.app';
 
-  const apiUrl = 'http://15.206.148.100:8081';
-
+  const apiUrl = 'http://15.207.20.189:8081';
   const token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzdXBlcmFkbWluQGdtYWlsLmNvbSIsImlhdCI6MTcwMDQ3NzE2MywiZXhwIjozODQ3OTYwODEwfQ.r0m_f1jui6oyZprcBvTaBgR3Bt8mupeK_bQG5_UAsOAF6kcH1mJ9_YcrFJN__eol9qDi4WUbqvklG7M6KxtX6g';
 
 
@@ -172,22 +172,133 @@ function SoftDelete() {
     setCountries(sortedCountries);
   };
 
+  // Hard delete coutnry code
+
+  const confirmHardDelete = (countryId, countryName) => {
+    const confirmMessage = `Do you want to hard delete the country ${countryName}?`;
+
+    if (window.confirm(confirmMessage)) {
+      hardDeleteCountry(countryId);
+    } else {
+      // User clicked 'Cancel', do nothing or provide feedback
+    }
+  };
+
+  const reloadData = () => {
+    // Refetch data from the API
+    fetch(`${apiUrl}/country/softDeleted`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data && data.status && data.data) {
+          // Extract the list of countries from the "data" property
+          const countryData = data.data;
+          setCountries(countryData);
+        } else {
+          console.error('Data not found in the API response');
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  };
+
+  const hardDeleteCountry = (countryId) => {
+    if (countryToDelete) {
+      fetch(`${apiUrl}/country/hardDelete/${countryToDelete.countryId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('Country hard deleted successfully', data);
+          handleCloseDeleteModal();
+          openDeleteSuccessModal();
+        })
+        .catch(error => {
+          console.error('Error hard deleting country:', error);
+          handleCloseDeleteModal();
+          openErrorModal(); // Open the error modal
+          // Reload data even if there's an error
+          reloadData();
+        });
+    }
+  };
+  
+  const openErrorModal = () => {
+    setShowErrorModal(true);
+  };
+  
+  const handleCloseErrorModal = () => {
+    setShowErrorModal(false);
+  };
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [countryToDelete, setCountryToDelete] = useState(null);
+  const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
+
+  const openDeleteModal = (country) => {
+    setCountryToDelete(country);
+    setShowDeleteModal(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setShowDeleteModal(false);
+  };
+
+  const handleConfirmHardDelete = () => {
+    if (countryToDelete) {
+      hardDeleteCountry(countryToDelete.countryId);
+      handleCloseDeleteModal();
+      openDeleteSuccessModal();
+    }
+  };
+
+  const openDeleteSuccessModal = () => {
+    setShowDeleteSuccessModal(true);
+  };
+
+  const handleCloseDeleteSuccessModal = () => {
+    setShowDeleteSuccessModal(false);
+  };
+
+  const showAlert = (type, message) => {
+    alert(`${type.toUpperCase()}: ${message}`);
+    // You might want to use a more sophisticated alert/notification component instead of the native alert.
+    // Update state, if needed, to manage the alert in your UI.
+  };
+
 
   return (
     <div>
       {/* Restore Modal */}
       <Modal show={showRestoreModal} onHide={handleCloseRestoreModal} centered backdrop="static" keyboard={false}>
         <Modal.Header style={{ backgroundColor: '#113c62', color: 'white', paddingBottom: '0' }}>
-          <Modal.Title>Confirm Restore</Modal.Title>
+          <Modal.Title>Confirm Restore</Modal.Title><p></p>
         </Modal.Header>
         <Modal.Body>
           Are you sure you want to restore {countryToRestore?.countryName}?
         </Modal.Body>
         <Modal.Footer style={{ paddingTop: '0' }}>
-          <Button variant="secondary" onClick={handleCloseRestoreModal} style={{ backgroundColor: '#113c62', color: 'white' }}>
+          <Button variant="secondary" onClick={handleCloseRestoreModal} style={{ backgroundColor: 'white', color: '#113c62' }}>
             Cancel
           </Button>
-          <Button variant="success" onClick={handleConfirmRestore} style={{ backgroundColor: '#113c62', color: 'white' }}>
+          <Button variant="secondary" onClick={handleConfirmRestore} style={{ backgroundColor: 'white', color: '#113c62' }}>
             Restore
           </Button>
         </Modal.Footer>
@@ -195,18 +306,62 @@ function SoftDelete() {
       {/* Restore Success Modal */}
       <Modal show={showRestoreSuccessModal} onHide={handleCloseRestoreSuccessModal} centered backdrop="static" keyboard={false}>
         <Modal.Header style={{ backgroundColor: '#113c62', color: 'white', paddingBottom: '0' }}>
-          <Modal.Title>Restore Successful</Modal.Title>
+          <Modal.Title>Restore Successful</Modal.Title><p></p>
         </Modal.Header>
         <Modal.Body>
           Country has been restored successfully.
         </Modal.Body>
         <Modal.Footer style={{ paddingTop: '0' }}>
-          <Button variant="success" onClick={handleCloseRestoreSuccessModal} style={{ backgroundColor: '#113c62', color: 'white' }}>
+          <Button variant="success" onClick={handleCloseRestoreSuccessModal} style={{ backgroundColor: 'white', color: '#113c62' }}>
             OK
           </Button>
         </Modal.Footer>
       </Modal>
 
+      {/* Delete Modal */}
+      <Modal show={showDeleteModal} onHide={handleCloseDeleteModal} centered backdrop="static" keyboard={false}>
+        <Modal.Header style={{ backgroundColor: '#113c62', color: 'white', paddingBottom: '0' }}>
+          <Modal.Title>Confirm Hard Delete</Modal.Title><p></p>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to hard delete {countryToDelete?.countryName}?
+        </Modal.Body>
+        <Modal.Footer style={{ paddingTop: '0' }}>
+          <Button variant="secondary" onClick={handleCloseDeleteModal} style={{ backgroundColor: 'white', color: '#113c62' }}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleConfirmHardDelete} style={{ backgroundColor: 'white', color: '#113c62' }}>
+            Hard Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      {/* Delete Success Modal */}
+      <Modal show={showDeleteSuccessModal} onHide={handleCloseDeleteSuccessModal} centered backdrop="static" keyboard={false}>
+        <Modal.Header style={{ backgroundColor: '#113c62', color: 'white', paddingBottom: '0' }}>
+          <Modal.Title>Delete Successful</Modal.Title><p></p>
+        </Modal.Header>
+        <Modal.Body>
+          Country has been hard deleted successfully.
+        </Modal.Body>
+        <Modal.Footer style={{ paddingTop: '0' }}>
+          <Button variant="success" onClick={handleCloseDeleteSuccessModal} style={{ backgroundColor: 'white', color: '#113c62' }}>
+            OK
+          </Button>
+        </Modal.Footer>
+      </Modal>
+<Modal show={showErrorModal} onHide={handleCloseErrorModal} centered backdrop="static" keyboard={false}>
+  <Modal.Header style={{ backgroundColor: '#d9534f', color: 'white', paddingBottom: '0' }}>
+    <Modal.Title>Error</Modal.Title><p></p>
+  </Modal.Header>
+  <Modal.Body>
+    An error occurred while deleting the country.
+  </Modal.Body>
+  <Modal.Footer style={{ paddingTop: '0' }}>
+    <Button variant="danger" onClick={handleCloseErrorModal} style={{ backgroundColor: 'white', color: '#d9534f' }}>
+      OK
+    </Button>
+  </Modal.Footer>
+</Modal>
       <div className="body d-flex py-lg-3 py-md-2">
         <div className="container-fluid">
           <div className="row align-items-center">
@@ -245,7 +400,7 @@ function SoftDelete() {
                         {/* Breadcrumb code here */}
                       </nav>
                       <Link className="btn btn-primary btn-set-task w-sm-100" href="/country">
-                      <i class="bi bi-backspace-fill me-2"></i>                        Back
+                        <i class="bi bi-backspace-fill me-2"></i>                        Back
                       </Link>
                     </div>
                   </div>
@@ -392,16 +547,13 @@ function SoftDelete() {
                                         onClick={() => openRestoreModal(country)}
                                       >
                                         <i class="bi bi-bootstrap-reboot"></i>                                      </button>
-                                      <Link
-                                        className="edit btn btn-outline-secondary"
+                                      <button
+                                        className="delete btn btn-outline-secondary"
                                         style={{ display: "inline" }}
-                                        onClick={() => confirmDelete(country.countryId)}
-                                        href="#"
-
+                                        onClick={() => openDeleteModal(country)}
                                       >
-                                        <i class="bi bi-trash-fill"></i>
-
-                                      </Link>
+                                        <i className="bi bi-trash-fill"></i>
+                                      </button>
                                       {/* <form
                                     action="http://mines-manager.com/state/6"
                                     method="POST"

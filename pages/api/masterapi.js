@@ -1,6 +1,6 @@
 // masterApi.js
 
-const apiUrl = 'http://15.206.148.100:8081';
+const apiUrl = 'http://15.207.20.189:8081';
 
 // Function to make a GET request
 export const getApiData = async (country, token) => {
