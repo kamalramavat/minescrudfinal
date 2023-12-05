@@ -11,7 +11,6 @@ import { handleExportToExcel } from '../pages/api/masterapi';
 import 'jspdf-autotable';
 import { Modal, Button, Form } from 'react-bootstrap';
 import Cors from 'cors';
-import initMiddleware from '../../lib/init-middleware';
 
 
 
@@ -371,14 +370,16 @@ const Country = (countryId, handleShowViewModal, handleCloseViewModal) => {
     }
   };
 
-// Initialize the cors middleware
-const cors = initMiddleware(
-  // You can customize allowed origins here, or set it to true to allow any origin
-  Cors({
+
+  // Initialize the Cors middleware
+const initMiddleware = (handler) => {
+  return Cors({
+    methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE'],
     origin: true,
     credentials: true,
-  })
-);
+  });
+};
+
 
 
 
