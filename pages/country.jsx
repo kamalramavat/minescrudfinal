@@ -592,16 +592,16 @@ const initMiddleware = (handler) => {
   };
 
   const handleClick = async () => {
+
     
   const apiUrl = 'http://15.207.20.189:8081';
   const token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzdXBlcmFkbWluQGdtYWlsLmNvbSIsImlhdCI6MTcwMDQ3NzE2MywiZXhwIjozODQ3OTYwODEwfQ.r0m_f1jui6oyZprcBvTaBgR3Bt8mupeK_bQG5_UAsOAF6kcH1mJ9_YcrFJN__eol9qDi4WUbqvklG7M6KxtX6g';
 
+
     try {
-      // Assuming countryId is an object with an 'id' property
-      const countryIdValue = countryId.id;
-  
-      const updateUrl = `${apiUrl}/country/${countryIdValue}`;
-  
+      const updateUrl = `${apiUrl}/country/${countryId}`;
+
+      // Make a fetch request to your updated server endpoint to get the countryName
       const response = await fetch(updateUrl, {
         method: 'GET',
         headers: {
@@ -609,25 +609,26 @@ const initMiddleware = (handler) => {
           'Authorization': `${token}`
         },
         credentials: 'include',
+
       });
-  
+
       if (!response.ok) {
         throw new Error('Failed to fetch country information');
       }
-  
+
       const data = await response.json();
       const countryName = data.countryName;
-  
+
+      // Show an alert with the fetched country name
       alert(`Clicked on ${countryName}`);
-  
+
       // If you also want to trigger the modal, you can call the handleShowViewModal function
-      handleShowViewModal({ countryId: countryIdValue, countryName });
+      handleShowViewModal({ countryId, countryName });
     } catch (error) {
       console.error(error);
       alert('Failed to fetch country information');
     }
   };
-  
 
   return (
     <div>
