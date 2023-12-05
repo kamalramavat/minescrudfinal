@@ -34,6 +34,7 @@ const Country = (countryId, handleShowViewModal, handleCloseViewModal) => {
   const [showImportSuccessModal, setShowImportSuccessModal] = useState(false);
   const [importSuccessMessage, setImportSuccessMessage] = useState('');
   const fileInputRef = useRef(null);
+  const [totalElements, setTotalElements] = useState(0);
 
 
 
@@ -199,8 +200,34 @@ const Country = (countryId, handleShowViewModal, handleCloseViewModal) => {
   //   openEditModal();
   // };
 
-
-
+  // reload data
+  const reloadData = () => {
+    // Refetch data from the API
+    fetch(`${apiUrl}/country`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data && data.status && data.data) {
+          // Extract the list of countries from the "data" property
+          const countryData = data.data;
+          setCountries(countryData);
+        } else {
+          console.error('Data not found in the API response');
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  };
 
   // new code for edit with put
   const updateCountryOnServer = (countryId, updatedCountryName) => {
@@ -225,12 +252,70 @@ const Country = (countryId, handleShowViewModal, handleCloseViewModal) => {
       })
       .then(data => {
         console.log(`Data with countryId ${countryId} updated successfully on the server`);
-        // Perform any additional actions or handle the response as needed
+
+        // Fetch and display updated country data without reloading the whole page
+        reloadData();
       })
       .catch(error => {
         console.error('Error updating country data on the server:', error);
       });
   };
+  // const fetchAndDisplayCountryData = () => {
+  //   const countryListContainer = document.getElementById('countryName'); // Replace with the actual ID of your container
+
+  //   // Make a request to fetch the updated country data
+  //   fetch(apiUrl + '/country', {
+  //     method: 'GET',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       'Authorization': `Bearer ${token}`
+  //     }
+  //   })
+  //     .then(response => {
+  //       if (!response.ok) {
+  //         throw new Error('Network response was not ok');
+  //       }
+  //       return response.json();
+  //     })
+  //     .then(data => {
+  //       // Assuming data is an array of country objects
+  //       // Update the DOM with the new data
+  //       countryListContainer.innerHTML = ''; // Clear existing content
+
+  //       data.forEach(country => {
+  //         const countryElement = document.createElement('div');
+  //         countryElement.textContent = country.countryName;
+  //         // Add more logic to update other properties as needed
+
+  //         countryListContainer.appendChild(countryElement);
+  //       });
+  //     })
+  //     .catch(error => {
+  //       console.error('Error fetching and displaying country data:', error);
+  //     });
+  // };
+  const fetchBinElements = async () => {
+    try {
+      const response = await fetch(`${apiUrl}/country/softDeleted`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setTotalElements(data.totalElements);
+      } else {
+        console.error('Error fetching data');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+  useEffect(() => {
+    fetchBinElements();
+  }, []); // Empty dependency array means this effect runs once when the component mounts
 
   const handleCloseEditModal = () => {
     setShowEditModal(false);
@@ -248,7 +333,7 @@ const Country = (countryId, handleShowViewModal, handleCloseViewModal) => {
     if (countryToEdit && updatedCountryName !== '' && isValidCountryName(updatedCountryName)) {
       updateCountryOnServer(countryToEdit.countryId, updatedCountryName);
       handleCloseEditModal();
-      fetchData(); // Fetch fresh data after updating the country
+      reloadData(); // Fetch fresh data after updating the country
     } else {
       console.error('Invalid country name');
       // You may want to display an error message to the user here
@@ -495,16 +580,16 @@ const Country = (countryId, handleShowViewModal, handleCloseViewModal) => {
   };
 
   const handleClick = async () => {
-
-    const apiUrl = 'http://15.206.148.100:8081';
-
-    const token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzdXBlcmFkbWluQGdtYWlsLmNvbSIsImlhdCI6MTcwMDQ3NzE2MywiZXhwIjozODQ3OTYwODEwfQ.r0m_f1jui6oyZprcBvTaBgR3Bt8mupeK_bQG5_UAsOAF6kcH1mJ9_YcrFJN__eol9qDi4WUbqvklG7M6KxtX6g';
-
+    
+  const apiUrl = 'http://15.207.20.189:8081';
+  const token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzdXBlcmFkbWluQGdtYWlsLmNvbSIsImlhdCI6MTcwMDQ3NzE2MywiZXhwIjozODQ3OTYwODEwfQ.r0m_f1jui6oyZprcBvTaBgR3Bt8mupeK_bQG5_UAsOAF6kcH1mJ9_YcrFJN__eol9qDi4WUbqvklG7M6KxtX6g';
 
     try {
-      const updateUrl = `${apiUrl}/country/${countryId}`;
-
-      // Make a fetch request to your updated server endpoint to get the countryName
+      // Assuming countryId is an object with an 'id' property
+      const countryIdValue = countryId.id;
+  
+      const updateUrl = `${apiUrl}/country/${countryIdValue}`;
+  
       const response = await fetch(updateUrl, {
         method: 'GET',
         headers: {
@@ -512,27 +597,25 @@ const Country = (countryId, handleShowViewModal, handleCloseViewModal) => {
           'Authorization': `${token}`
         },
         credentials: 'include',
-
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to fetch country information');
       }
-
+  
       const data = await response.json();
       const countryName = data.countryName;
-
-      // Show an alert with the fetched country name
+  
       alert(`Clicked on ${countryName}`);
-
+  
       // If you also want to trigger the modal, you can call the handleShowViewModal function
-      handleShowViewModal({ countryId, countryName });
+      handleShowViewModal({ countryId: countryIdValue, countryName });
     } catch (error) {
       console.error(error);
       alert('Failed to fetch country information');
     }
   };
-
+  
 
   return (
     <div>
@@ -569,7 +652,7 @@ const Country = (countryId, handleShowViewModal, handleCloseViewModal) => {
                     </div>
                     <div className="col-md-3 mb-2">
                       <Link className="btn btn-primary mx-1 btn-set-task w-100" href="/softDelete">
-                        <i className="bi bi-archive"></i> Bin
+                        <i className="bi bi-archive"></i> Bin ({totalElements})
                       </Link>
                     </div>
                     <div className="col-md-2 mb-2">

@@ -18,6 +18,9 @@ function SoftDelete() {
   const [sortColumn, setSortColumn] = useState(null);
   const [sortOrder, setSortOrder] = useState('asc');
   const [showErrorModal, setShowErrorModal] = useState(false); // Add this line
+  const [isConfirmationShown, setIsConfirmationShown] = useState(false);
+  const [isDeleteSuccessModalOpen, setIsDeleteSuccessModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false); // New state for loading spinner
 
 
   //const itemsPerPage = 10;
@@ -177,12 +180,17 @@ function SoftDelete() {
   const confirmHardDelete = (countryId, countryName) => {
     const confirmMessage = `Do you want to hard delete the country ${countryName}?`;
 
-    if (window.confirm(confirmMessage)) {
+    if (!isConfirmationShown && window.confirm(confirmMessage)) {
+      setIsConfirmationShown(true);
+      setIsDeleting(true); // Set loading state to true
+
       hardDeleteCountry(countryId);
     } else {
+      setIsConfirmationShown(false);
       // User clicked 'Cancel', do nothing or provide feedback
     }
   };
+
 
   const reloadData = () => {
     // Refetch data from the API
@@ -211,7 +219,21 @@ function SoftDelete() {
         console.error('Error fetching data:', error);
       });
   };
-
+// Add these styles directly within the SoftDelete component
+<style jsx>{`
+  .loading-spinner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.7); /* Semi-transparent white background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Make sure it appears above other elements */
+  }
+`}</style>;
   const hardDeleteCountry = (countryId) => {
     if (countryToDelete) {
       fetch(`${apiUrl}/country/hardDelete/${countryToDelete.countryId}`, {
@@ -229,22 +251,25 @@ function SoftDelete() {
         .then(data => {
           console.log('Country hard deleted successfully', data);
           handleCloseDeleteModal();
-          openDeleteSuccessModal();
+          setIsDeleteSuccessModalOpen(true);
+          reloadData(); // Refresh data after successful delete
         })
         .catch(error => {
           console.error('Error hard deleting country:', error);
           handleCloseDeleteModal();
           openErrorModal(); // Open the error modal
-          // Reload data even if there's an error
-          reloadData();
+          setIsConfirmationShown(false); // Reset confirmation state
+        })
+        .finally(() => {
+          setIsDeleting(false); // Set loading state to false after request completion
         });
     }
   };
-  
+
   const openErrorModal = () => {
     setShowErrorModal(true);
   };
-  
+
   const handleCloseErrorModal = () => {
     setShowErrorModal(false);
   };
@@ -254,7 +279,7 @@ function SoftDelete() {
 
   const openDeleteModal = (country) => {
     setCountryToDelete(country);
-    setShowDeleteModal(true);
+    setShowDeleteModal(true);setIsDeleting(true);
   };
 
   const handleCloseDeleteModal = () => {
@@ -274,7 +299,8 @@ function SoftDelete() {
   };
 
   const handleCloseDeleteSuccessModal = () => {
-    setShowDeleteSuccessModal(false);
+    setIsDeleteSuccessModalOpen(false);
+    setIsConfirmationShown(false); // Reset confirmation state
   };
 
   const showAlert = (type, message) => {
@@ -325,18 +351,28 @@ function SoftDelete() {
         </Modal.Header>
         <Modal.Body>
           Are you sure you want to hard delete {countryToDelete?.countryName}?
+          <p></p>
+          <p style={{ color: 'red' }}>
+            Please note that all the data associated with {countryToDelete?.countryName} will be deleted permenenantly.
+          </p>
         </Modal.Body>
         <Modal.Footer style={{ paddingTop: '0' }}>
           <Button variant="secondary" onClick={handleCloseDeleteModal} style={{ backgroundColor: 'white', color: '#113c62' }}>
             Cancel
           </Button>
-          <Button variant="danger" onClick={handleConfirmHardDelete} style={{ backgroundColor: 'white', color: '#113c62' }}>
+          <Button variant="danger" onClick={handleConfirmHardDelete} style={{ backgroundColor: 'red', color: 'white' }}>
             Hard Delete
           </Button>
         </Modal.Footer>
       </Modal>
       {/* Delete Success Modal */}
-      <Modal show={showDeleteSuccessModal} onHide={handleCloseDeleteSuccessModal} centered backdrop="static" keyboard={false}>
+      <Modal
+        show={isDeleteSuccessModalOpen}
+        onHide={handleCloseDeleteSuccessModal}
+        centered
+        backdrop="static"
+        keyboard={false}
+      >
         <Modal.Header style={{ backgroundColor: '#113c62', color: 'white', paddingBottom: '0' }}>
           <Modal.Title>Delete Successful</Modal.Title><p></p>
         </Modal.Header>
@@ -348,20 +384,29 @@ function SoftDelete() {
             OK
           </Button>
         </Modal.Footer>
+
       </Modal>
-<Modal show={showErrorModal} onHide={handleCloseErrorModal} centered backdrop="static" keyboard={false}>
-  <Modal.Header style={{ backgroundColor: '#d9534f', color: 'white', paddingBottom: '0' }}>
-    <Modal.Title>Error</Modal.Title><p></p>
-  </Modal.Header>
-  <Modal.Body>
-    An error occurred while deleting the country.
-  </Modal.Body>
-  <Modal.Footer style={{ paddingTop: '0' }}>
-    <Button variant="danger" onClick={handleCloseErrorModal} style={{ backgroundColor: 'white', color: '#d9534f' }}>
-      OK
-    </Button>
-  </Modal.Footer>
-</Modal>
+      <Modal show={showErrorModal} onHide={handleCloseErrorModal} centered backdrop="static" keyboard={false}>
+        <Modal.Header style={{ backgroundColor: '#d9534f', color: 'white', paddingBottom: '0' }}>
+          <Modal.Title>Error</Modal.Title><p></p>
+        </Modal.Header>
+        <Modal.Body>
+          An error occurred while deleting the country.
+        </Modal.Body>
+        <Modal.Footer style={{ paddingTop: '0' }}>
+          <Button variant="danger" onClick={handleCloseErrorModal} style={{ backgroundColor: 'white', color: '#d9534f' }}>
+            OK
+          </Button>
+        </Modal.Footer>
+      </Modal>
+        {/* loader  code*/}
+        {isDeleting && (
+        <div className="loading-spinner-overlay">
+          <div className="spinner-border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      )}
       <div className="body d-flex py-lg-3 py-md-2">
         <div className="container-fluid">
           <div className="row align-items-center">
