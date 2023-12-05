@@ -727,13 +727,14 @@ const initMiddleware = (handler) => {
                 {/* Modal Footer */}
                 <div className="modal-footer">
                   {/* Close button to close the modal */}
-                  <button type="button" className="btn btn-secondary" onClick={() => setIsImportModalOpen(false)}>Close</button>
+                  <button type="button" className="btn btn-secondary" onClick={() => setIsImportModalOpen(false)} style={{ backgroundColor: 'white', color: '#113c62' }}>Close</button>
                   {/* Button to trigger the import process */}
                   <Button
                     type="button"
                     className="btn btn-primary"
                     onClick={handleImport}
                     disabled={loading}
+                    
                   >
                     Import
                   </Button>
@@ -950,7 +951,7 @@ const initMiddleware = (handler) => {
                                     </Form>
                                   </Modal.Body>
                                   <Modal.Footer style={{ paddingTop: '0' }}>
-                                    <Button variant="secondary" onClick={handleCloseEditModal} style={{ backgroundColor: '#113c62', color: 'white' }}>
+                                    <Button variant="secondary" onClick={handleCloseEditModal} style={{ backgroundColor: 'white', color: '#113c62' }}>
                                       Cancel
                                     </Button>
                                     <Button variant="primary" onClick={handleUpdateCountry} style={{ backgroundColor: '#113c62', color: 'white' }}>
@@ -968,7 +969,7 @@ const initMiddleware = (handler) => {
                                     Are you sure you want to delete {countryToDelete?.countryName}?
                                   </Modal.Body>
                                   <Modal.Footer style={{ paddingTop: '0' }}>
-                                    <Button variant="secondary" onClick={handleCloseDeleteModal} style={{ backgroundColor: '#113c62', color: 'white' }}>
+                                    <Button variant="secondary" onClick={handleCloseDeleteModal} style={{ backgroundColor: 'white', color: '#113c62' }}>
                                       Cancel
                                     </Button>
                                     <Button variant="danger" onClick={handleConfirmDelete} style={{ backgroundColor: '#113c62', color: 'white' }}>

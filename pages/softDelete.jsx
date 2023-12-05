@@ -324,7 +324,7 @@ function SoftDelete() {
           <Button variant="secondary" onClick={handleCloseRestoreModal} style={{ backgroundColor: 'white', color: '#113c62' }}>
             Cancel
           </Button>
-          <Button variant="secondary" onClick={handleConfirmRestore} style={{ backgroundColor: 'white', color: '#113c62' }}>
+          <Button variant="secondary" onClick={handleConfirmRestore} style={{ backgroundColor: '#113c62', color: 'white' }}>
             Restore
           </Button>
         </Modal.Footer>
