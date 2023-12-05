@@ -17,3 +17,11 @@ module.exports = {
   }
 }
 module.exports = nextConfig
+let fs;
+if (typeof window === 'undefined') {
+  // This code will be executed in a Node.js environment
+  fs = require('fs');
+} else {
+  // This code will be executed in a browser environment
+  fs = null; // or provide a suitable alternative for browser-based file operations
+}
