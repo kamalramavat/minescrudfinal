@@ -10,6 +10,8 @@ import { getApiData } from '../pages/api/masterapi';
 import { handleExportToExcel } from '../pages/api/masterapi';
 import 'jspdf-autotable';
 import { Modal, Button, Form } from 'react-bootstrap';
+import Cors from 'cors';
+import initMiddleware from '../../lib/init-middleware';
 
 
 
@@ -369,7 +371,23 @@ const Country = (countryId, handleShowViewModal, handleCloseViewModal) => {
     }
   };
 
+// Initialize the cors middleware
+const cors = initMiddleware(
+  // You can customize allowed origins here, or set it to true to allow any origin
+  Cors({
+    origin: true,
+    credentials: true,
+  })
+);
 
+// Example API route
+export default async function handler(req, res) {
+  // Run cors middleware
+  await cors(req, res);
+
+  // Your API logic here
+  res.status(200).json({ message: 'Hello World' });
+}
 
 
 
