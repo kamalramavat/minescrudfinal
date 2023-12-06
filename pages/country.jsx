@@ -36,6 +36,7 @@ const Country = (countryId, handleShowViewModal, handleCloseViewModal) => {
   const [importSuccessMessage, setImportSuccessMessage] = useState('');
   const fileInputRef = useRef(null);
   const [totalElements, setTotalElements] = useState(0);
+  const [showModal, setShowModal] = useState(false);
 
 
 
@@ -51,9 +52,14 @@ const Country = (countryId, handleShowViewModal, handleCloseViewModal) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const countryData = await getApiData('country', token);
+        // Modify the getApiData function to include sorting parameters
+        const countryData = await getApiData('country', token, {
+          sortBy: 'updatedAt',
+          sortDirection: 'des',
+        });
+  
         setCountries(countryData);
-
+  
         console.log(countryData);
         // Set state or perform other actions with the data
       } catch (error) {
@@ -61,9 +67,10 @@ const Country = (countryId, handleShowViewModal, handleCloseViewModal) => {
         // Handle error
       }
     };
-
+  
     fetchData();
   }, [token, itemsPerPage, currentPage, searchTerm]);
+  
 
   // Filter the data based on the search term
   const filteredCountries = countries.filter(country => {
@@ -372,13 +379,13 @@ const Country = (countryId, handleShowViewModal, handleCloseViewModal) => {
 
 
   // Initialize the Cors middleware
-const initMiddleware = (handler) => {
-  return Cors({
-    methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    origin: true,
-    credentials: true,
-  });
-};
+  const initMiddleware = (handler) => {
+    return Cors({
+      methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE'],
+      origin: true,
+      credentials: true,
+    });
+  };
 
 
 
@@ -591,44 +598,49 @@ const initMiddleware = (handler) => {
     handleCloseViewModal();
   };
 
-  const handleClick = async () => {
-
-    
-  const apiUrl = 'http://15.207.20.189:8081';
-  const token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzdXBlcmFkbWluQGdtYWlsLmNvbSIsImlhdCI6MTcwMDQ3NzE2MywiZXhwIjozODQ3OTYwODEwfQ.r0m_f1jui6oyZprcBvTaBgR3Bt8mupeK_bQG5_UAsOAF6kcH1mJ9_YcrFJN__eol9qDi4WUbqvklG7M6KxtX6g';
-
-
+  const fetchDataView = async (countryId) => {
     try {
-      const updateUrl = `${apiUrl}/country/${countryId}`;
-
-      // Make a fetch request to your updated server endpoint to get the countryName
-      const response = await fetch(updateUrl, {
+      const response = await fetch(`${apiUrl}/country`, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `${token}`
-        },
-        credentials: 'include',
-
+          'Authorization': `Bearer ${token}`
+        }
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch country information');
+        throw new Error('Network response was not ok');
       }
 
       const data = await response.json();
-      const countryName = data.countryName;
 
-      // Show an alert with the fetched country name
-      alert(`Clicked on ${countryName}`);
+      if (data && data.status && data.data) {
+        const countryData = data.data;
+        setCountries(countryData);
 
-      // If you also want to trigger the modal, you can call the handleShowViewModal function
-      handleShowViewModal({ countryId, countryName });
+        // Find the selected country based on countryId (assuming it's present in the fetched data)
+        const selectedCountry = countryData.find(country => country.countryId === countryId);
+
+        if (selectedCountry) {
+          setSelectedCountry(selectedCountry);
+          setShowModal(true);
+        } else {
+          console.error('Selected country not found in the data');
+        }
+      } else {
+        console.error('Data not found in the API response');
+      }
     } catch (error) {
-      console.error(error);
-      alert('Failed to fetch country information');
+      console.error('Error fetching data:', error);
     }
   };
+
+  const handleCloseModalview = () => {
+    setShowModal(false);
+    setSelectedCountry(null);
+  };
+
+
+
 
   return (
     <div>
@@ -735,7 +747,7 @@ const initMiddleware = (handler) => {
                     className="btn btn-primary"
                     onClick={handleImport}
                     disabled={loading}
-                    
+
                   >
                     Import
                   </Button>
@@ -912,24 +924,25 @@ const initMiddleware = (handler) => {
                                       >
                                         <i class="bi bi-trash-fill"></i>
                                       </button>
+
+
                                       <button
                                         className="view btn btn-outline-secondary"
                                         style={{ display: "inline" }}
-                                        onClick={handleClick}
+                                        onClick={() => fetchDataView(country.countryId)}
                                       >
-                                        <i class="bi bi-display"></i>
-                                      </button>
+                                        <i class="bi bi-eye"></i>                                                                              </button>
 
                                     </td>
                                   </tr>
                                 ))}
-                                {/* Modal or other component to display the countryName */}
-                                {selectedCountry && (
-                                  <div>
-                                    <h2>Selected Country: {selectedCountry}</h2>
-                                    {/* Other modal content */}
+                                {/* Map through the countries and display them */}
+                                {/* {countries.map(country => (
+                                  <div key={country.countryId}>
+                                    <p>{country.countryName}</p>
+
                                   </div>
-                                )}
+                                ))} */}
                                 {/* Edit Modal */}
                                 <Modal show={showEditModal} onHide={handleCloseEditModal} centered>
                                   <Modal.Header style={{ backgroundColor: '#113c62', color: 'white', paddingBottom: '0' }}>
@@ -979,23 +992,34 @@ const initMiddleware = (handler) => {
                                   </Modal.Footer>
                                 </Modal>
                                 {/* Modal for viewing country details */}
-                                <Modal
-                                  isOpen={isViewModalOpen}
-                                  onRequestClose={handleCloseViewModal}
-                                  contentLabel="View Country Modal"
-                                // Add your modal styling here
-                                >
-                                  {selectedCountry && (
-                                    <div>
-                                      {/* Display country details in the modal */}
-                                      <h2>Country Details</h2>
-                                      <p>Country Name: {selectedCountry.countryName}</p>
+                                {/* {countries.map(country => (
+                                  <div key={country.countryId}>
+                                    <p>{country.countryName}</p>
+                                     <button
+                                      className="view btn btn-outline-secondary"
+                                      style={{ display: "inline" }}
+                                      onClick={() => handleClick(country.countryId)}
+                                    >
+                                      <i className="bi bi-display"></i> View
+                                    </button> 
+                                  </div>
+                                ))} */}
 
-                                      {/* Add more details as needed */}
-
-                                      <button onClick={handleCloseViewModal}>Close</button>
-                                    </div>
-                                  )}
+                                {/* Modal to display country information */}
+                                <Modal show={showModal} onHide={handleCloseModalview} centered backdrop="static" keyboard={false}>
+                                  <Modal.Header className='md-2' style={{ backgroundColor: '#113c62', color: 'white', paddingBottom: '0' }} closeButton>
+                                    <Modal.Title>Selected Country</Modal.Title>
+                                  </Modal.Header>
+                                  <Modal.Body>
+                                    <p><b>Country ID:</b> {selectedCountry?.countryId}  </p>
+                                    <p><b>Country Name:</b> {selectedCountry?.countryName}</p>
+                                    {/* Add other country information here */}
+                                  </Modal.Body>
+                                  <Modal.Footer>
+                                    <Button variant="secondary" onClick={handleCloseModalview} style={{ backgroundColor: 'white', color: '#113c62' }}>
+                                      Close
+                                    </Button>
+                                  </Modal.Footer>
                                 </Modal>
                               </tbody>
                             </table>

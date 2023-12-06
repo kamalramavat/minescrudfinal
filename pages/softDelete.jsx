@@ -21,13 +21,15 @@ function SoftDelete() {
   const [isConfirmationShown, setIsConfirmationShown] = useState(false);
   const [isDeleteSuccessModalOpen, setIsDeleteSuccessModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false); // New state for loading spinner
+  const [seconds, setSeconds] = useState(7);
+  const [isEnabled, setEnabled] = useState(false);
 
 
   //const itemsPerPage = 10;
   //const token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzdXBlcmFkbWluQGdtYWlsLmNvbSIsImlhdCI6MTY5ODIzMzA0MywiZXhwIjozODQ1NzE2NjkwfQ.9NGroKV45c2A56PpaA_xkbPI5QTd_E1XdoF1Ru1wU1jIGT2UBYG4sH4mXMUDjBAooqsUVBSzE0xKpr89KcFwmQ'; // Replace with your actual token
   //const apiUrl = 'https://mines-manager.up.railway.app';
 
-  const apiUrl = 'http://15.207.20.189:8081';
+  const apiUrl = 'http://192.168.1.41:8081';
   const token = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzdXBlcmFkbWluQGdtYWlsLmNvbSIsImlhdCI6MTcwMDQ3NzE2MywiZXhwIjozODQ3OTYwODEwfQ.r0m_f1jui6oyZprcBvTaBgR3Bt8mupeK_bQG5_UAsOAF6kcH1mJ9_YcrFJN__eol9qDi4WUbqvklG7M6KxtX6g';
 
 
@@ -60,7 +62,18 @@ function SoftDelete() {
       .catch(error => {
         console.error('Error fetching data:', error);
       });
-  }, [token, itemsPerPage, currentPage, searchTerm]);
+
+      const interval = setInterval(() => {
+        if (seconds > 0) {
+          setSeconds((prevSeconds) => prevSeconds - 1);
+        } else {
+          setEnabled(true);
+          clearInterval(interval);
+        }
+      }, 1000);
+  
+      return () => clearInterval(interval);
+  }, [token, itemsPerPage, currentPage, searchTerm,seconds]);
 
 
   // Filter the data based on the search term
@@ -360,8 +373,8 @@ function SoftDelete() {
           <Button variant="secondary" onClick={handleCloseDeleteModal} style={{ backgroundColor: 'white', color: '#113c62' }}>
             Cancel
           </Button>
-          <Button variant="danger" onClick={handleConfirmHardDelete} style={{ backgroundColor: 'red', color: 'white' }}>
-            Hard Delete
+          <Button variant="danger" onClick={handleConfirmHardDelete} style={{ backgroundColor: 'red', color: 'white' }} disabled={!isEnabled}>
+            Hard Delete {seconds}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -595,7 +608,7 @@ function SoftDelete() {
                                       <button
                                         className="delete btn btn-outline-secondary"
                                         style={{ display: "inline" }}
-                                        onClick={() => openDeleteModal(country)}
+                                        onClick={() => openDeleteModal(country) }
                                       >
                                         <i className="bi bi-trash-fill"></i>
                                       </button>
